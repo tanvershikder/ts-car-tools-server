@@ -128,7 +128,11 @@ async function run() {
         })
 
         //post booking order in to database
-       
+        app.post('/orders', async (req, res) => {
+            const orders = req.body;
+            const result = await orderColelction.insertOne(orders);
+            res.send(result)
+        })
 
         // Update quantity
         app.put('/products/:id', async (req, res) => {
