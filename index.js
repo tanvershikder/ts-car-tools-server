@@ -111,7 +111,12 @@ async function run() {
         })
 
         //deleted user 
-        
+        app.delete('/user/admin/:email', verifyJWT, verifyAdmin, async (req, res) => {
+            const email = req.params.email;
+            const filter = { email: email }
+            const result = await userCollection.deleteOne(filter)
+            res.send(result)
+        })
 
 
         //get specefic product
@@ -123,11 +128,7 @@ async function run() {
         })
 
         //post booking order in to database
-        app.post('/orders', async (req, res) => {
-            const orders = req.body;
-            const result = await orderColelction.insertOne(orders);
-            res.send(result)
-        })
+       
 
         // Update quantity
         app.put('/products/:id', async (req, res) => {
