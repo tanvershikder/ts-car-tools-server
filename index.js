@@ -77,6 +77,29 @@ async function run() {
             res.send(result)
         })
 
+        // Update quantity
+        app.put('/products/:id', async (req, res) => {
+            const id = req.params.id;
+            console.log(id);
+            const quantity = req.body.updatequantity;
+            console.log(quantity);
+            const filter = { _id: ObjectId(id) }
+            const option = { upsert: true };
+            const updatePro = {
+                $set: {
+                    quantity
+                }
+            }
+            const result = await toolscollection.updateOne(filter, updatePro, option);
+            res.send(result)
+        })
+        //get specefic product
+        app.get('/products/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const tool = await toolscollection.findOne(query);
+            res.send(tool)
+        })
 
         //send user information in to backend i mean mongodb
 
@@ -109,13 +132,13 @@ async function run() {
             const result = await userCollection.updateOne(filter, updateDoc);
             res.send({ result })
 
-        })  
+        })
 
         // update user
         app.put('/userinfo/:email', verifyJWT, async (req, res) => {
             const email = req.params.email
             const img = req.body
-            console.log(img,email);
+            console.log(img, email);
             const filter = { email: email }
             const updateDoc = {
                 $set: { img: img },
@@ -142,13 +165,7 @@ async function run() {
         })
 
 
-        //get specefic product
-        app.get('/products/:id', async (req, res) => {
-            const id = req.params.id;
-            const query = { _id: ObjectId(id) };
-            const tool = await toolscollection.findOne(query);
-            res.send(tool)
-        })
+
 
         //post booking order in to database
         app.post('/orders', async (req, res) => {
@@ -157,28 +174,20 @@ async function run() {
             res.send(result)
         })
 
-        // Update quantity
-        app.put('/products/:id', async (req, res) => {
-            const id = req.params.id;
-            console.log(id);
-            const quantity = req.body.updatequantity;
-            console.log(quantity);
-            const filter = { _id: ObjectId(id) }
-            const option = { upsert: true };
-            const updatePro = {
-                $set: {
-                    quantity
-                }
-            }
-            const result = await toolscollection.updateOne(filter, updatePro, option);
-            res.send(result)
-        })
 
         //get user all orders
-        app.get('/orders/:email', async (req, res) => {
+        app.get('/orders/:email',verifyJWT, async (req, res) => {
             const email = req.params.email
             const result = await orderColelction.find({ email }).toArray()
             res.send(result)
+        })
+
+        // get specefic order
+        app.get('/specificorders/:id',verifyJWT, async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const order = await orderColelction.findOne(query);
+            res.send(order)
         })
 
         //get all orders
@@ -204,7 +213,7 @@ async function run() {
         })
 
         //get all review
-        app.get('/reviews',verifyJWT,async(req,res)=>{
+        app.get('/reviews', verifyJWT, async (req, res) => {
             const result = await reviewColelction.find().toArray()
             res.send(result)
         })
