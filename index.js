@@ -37,6 +37,7 @@ async function run() {
         const toolscollection = client.db("ts-car-tools").collection("tools");
         const userCollection = client.db('ts-car-tools').collection('users');
         const orderColelction = client.db('ts-car-tools').collection('order')
+        const reviewColelction = client.db('ts-car-tools').collection('review')
         console.log("connected");
 
 
@@ -68,6 +69,14 @@ async function run() {
             res.send(result);
         })
 
+        //delete product
+        app.delete('/products/:id', verifyJWT, verifyAdmin, async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const result = await toolscollection.deleteOne(filter)
+            res.send(result)
+        })
+
 
         //send user information in to backend i mean mongodb
 
@@ -96,6 +105,20 @@ async function run() {
             const filter = { email: email }
             const updateDoc = {
                 $set: { role: 'admin' },
+            }
+            const result = await userCollection.updateOne(filter, updateDoc);
+            res.send({ result })
+
+        })  
+
+        // update user
+        app.put('/userinfo/:email', verifyJWT, async (req, res) => {
+            const email = req.params.email
+            const img = req.body
+            console.log(img,email);
+            const filter = { email: email }
+            const updateDoc = {
+                $set: { img: img },
             }
             const result = await userCollection.updateOne(filter, updateDoc);
             res.send({ result })
@@ -170,6 +193,27 @@ async function run() {
             const id = req.params.id;
             const filter = { _id: ObjectId(id) }
             const result = await orderColelction.deleteOne(filter)
+            res.send(result)
+        })
+
+        // post review
+        app.post('/review', verifyJWT, async (req, res) => {
+            const product = req.body
+            const result = await reviewColelction.insertOne(product)
+            res.send(result);
+        })
+
+        //get all review
+        app.get('/reviews',verifyJWT,async(req,res)=>{
+            const result = await reviewColelction.find().toArray()
+            res.send(result)
+        })
+
+        //delete review
+        app.delete('/review/:id', verifyJWT, async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) }
+            const result = await reviewColelction.deleteOne(filter)
             res.send(result)
         })
 
