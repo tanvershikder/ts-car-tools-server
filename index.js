@@ -2,10 +2,10 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
-const port = process.env.PORT || 4000;
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
-
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
+const port = process.env.PORT || 4000;
 //middleware
 app.use(cors())
 app.use(express.json())
@@ -224,6 +224,21 @@ async function run() {
             const filter = { _id: ObjectId(id) }
             const result = await reviewColelction.deleteOne(filter)
             res.send(result)
+        })
+
+        //send payment into database
+        app.post('create-payment-intent',async(req,res)=>{
+            const order = req.body;
+            const {toolPrice} = order;
+            const amount = toolPrice * 100;
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: "usd",
+                payment_method_types: ['card']
+              });
+              res.send({
+                clientSecret: paymentIntent.client_secret,
+              });
         })
 
     }
