@@ -38,6 +38,7 @@ async function run() {
         const userCollection = client.db('ts-car-tools').collection('users');
         const orderColelction = client.db('ts-car-tools').collection('order')
         const reviewColelction = client.db('ts-car-tools').collection('review')
+        const paymentCollection = client.db('doctor_portal').collection('payments')
         console.log("connected");
 
 
@@ -226,20 +227,24 @@ async function run() {
             res.send(result)
         })
 
-        //send payment into database
-        app.post('create-payment-intent',async(req,res)=>{
-            const order = req.body;
-            const {toolPrice} = order;
-            const amount = toolPrice * 100;
+        // send payment into database
+       
+
+
+        app.post('/create-payment-intent', verifyJWT, async (req, res) => {
+            const price = req.body.price;
+            const amount = price * 100;   
+      
+            // Create a PaymentIntent with the order amount and currency
             const paymentIntent = await stripe.paymentIntents.create({
-                amount: amount,
-                currency: "usd",
-                payment_method_types: ['card']
-              });
-              res.send({
-                clientSecret: paymentIntent.client_secret,
-              });
-        })
+              amount : amount,
+              currency: 'usd',
+              payment_method_types:['card']  
+            });
+            res.send({
+              clientSecret: paymentIntent.client_secret,
+            })
+          })
 
     }
     finally {
