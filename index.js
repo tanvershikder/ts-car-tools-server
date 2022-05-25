@@ -38,7 +38,7 @@ async function run() {
         const userCollection = client.db('ts-car-tools').collection('users');
         const orderColelction = client.db('ts-car-tools').collection('order')
         const reviewColelction = client.db('ts-car-tools').collection('review')
-        const paymentCollection = client.db('doctor_portal').collection('payments')
+        const paymentCollection = client.db('ts-car-tools').collection('payments')
         console.log("connected");
 
 
@@ -177,14 +177,14 @@ async function run() {
 
 
         //get user all orders
-        app.get('/orders/:email',verifyJWT, async (req, res) => {
+        app.get('/orders/:email', verifyJWT, async (req, res) => {
             const email = req.params.email
             const result = await orderColelction.find({ email }).toArray()
             res.send(result)
         })
 
         // get specefic order
-        app.get('/specificorders/:id',verifyJWT, async (req, res) => {
+        app.get('/specificorders/:id', verifyJWT, async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const order = await orderColelction.findOne(query);
@@ -214,7 +214,7 @@ async function run() {
         })
 
         //get all review
-        app.get('/reviews', verifyJWT, async (req, res) => {
+        app.get('/getreviews', async (req, res) => {
             const result = await reviewColelction.find().toArray()
             res.send(result)
         })
@@ -228,23 +228,59 @@ async function run() {
         })
 
         // send payment into database
-       
-
 
         app.post('/create-payment-intent', verifyJWT, async (req, res) => {
             const price = req.body.price;
-            const amount = price * 100;   
-      
-            // Create a PaymentIntent with the order amount and currency
-            const paymentIntent = await stripe.paymentIntents.create({
-              amount : amount,
-              currency: 'usd',
-              payment_method_types:['card']  
-            });
-            res.send({
-              clientSecret: paymentIntent.client_secret,
-            })
-          })
+            const amount = price * 100;
+            if (amount !== 0) {
+                const paymentIntent = await stripe.paymentIntents.create({
+                    amount: amount,
+                    currency: 'usd',
+                    payment_method_types: ['card']
+                });
+                res.send({
+                    clientSecret: paymentIntent.client_secret,
+                })
+            }
+        })
+
+        //store payment and update order information
+
+        app.patch("/orders/:id", verifyJWT, async (req, res) => {
+            const id = req.params.id;
+            const payment = req.body;
+            const filter = { _id: ObjectId(id) }
+            const updateDoc = {
+                $set: {
+                    paid: true,
+                    transactionId: payment.transactionID
+                }
+            }
+            const result = await paymentCollection.insertOne(payment);
+            const updateOrders = await orderColelction.updateOne(filter, updateDoc)
+
+            // console.log("sending email");
+            // sendPaymentConfirmedEmail(payment.appointment)
+
+            res.send(updateOrders)
+        })
+
+        //change order after paymet and give shifrting
+        app.patch("/shiftorders/:id", verifyJWT, async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) }
+            const updateDoc = {
+                $set: {
+                    shift: true
+                }
+            }
+            const updateOrders = await orderColelction.updateOne(filter, updateDoc)
+
+            // console.log("sending email");
+            // sendPaymentConfirmedEmail(payment.appointment)
+
+            res.send(updateOrders)
+        })
 
     }
     finally {
