@@ -57,10 +57,31 @@ async function run() {
 
 
         // get all products
-        app.get('/products', async (req, res) => {
-            const cursor = toolscollection.find({});
-            const result = await cursor.toArray()
-            res.send(result)
+        
+        app.get('/productCount',async(req,res)=>{
+            const count = await toolscollection.estimatedDocumentCount();
+            res.send({count})
+        })
+        
+        app.get('/products',async(req,res)=>{
+            // console.log("query",req.query);
+            const page = parseInt(req.query.page);
+            const size = parseInt(req.query.size);
+
+            const query = {}
+            const cursor = toolscollection.find(query);
+
+            let products;
+
+            if(page || size){
+                 products = await cursor.skip(page*size).limit(size).toArray();
+            }
+            else{
+                products = await cursor.toArray();
+            }
+
+            
+            res.send(products)
         })
 
         //post products
