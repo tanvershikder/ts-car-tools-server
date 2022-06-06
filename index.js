@@ -115,6 +115,20 @@ async function run() {
             const result = await toolscollection.updateOne(filter, updatePro, option);
             res.send(result)
         })
+        // Update Product
+        app.put('/product/:id', async (req, res) => {
+            const id = req.params.id;
+            console.log(id);
+            const product = req.body;
+            console.log(product);
+            const filter = { _id: ObjectId(id) }
+            const option = { upsert: true };
+            const updatePro = {
+                $set: product
+            }
+            const result = await toolscollection.updateOne(filter, updatePro, option);
+            res.send(result)
+        })
         //get specefic product
         app.get('/products/:id', async (req, res) => {
             const id = req.params.id;
