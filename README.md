@@ -1,5 +1,5 @@
 # Ts-Car-Tools 
-manufacturer-website-server-side-tanvershikder created by GitHub Classroom
+manufacturer-website-server-side-tanvershikder 
 ## live site link is 
  [live site] (https://vast-wave-21361.herokuapp.com/)
 ## techonology are used is
