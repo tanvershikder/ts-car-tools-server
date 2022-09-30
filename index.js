@@ -294,8 +294,7 @@ async function run() {
             const result = await paymentCollection.insertOne(payment);
             const updateOrders = await orderColelction.updateOne(filter, updateDoc)
 
-            // console.log("sending email");
-            // sendPaymentConfirmedEmail(payment.appointment)
+           
 
             res.send(updateOrders)
         })
